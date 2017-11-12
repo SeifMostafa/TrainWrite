@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="activity_horizontal_margin">16dp</dimen>
+    <dimen name="activity_vertical_margin">16dp</dimen>
+    <dimen name="activity_actionbar_margin">24dp</dimen>
+    <dimen name="activity_double_actionbar_margin">48dp</dimen>
+    <dimen name="activity_word_textsize_listitem">72sp</dimen>
+    <dimen name="activity_word_textsize">98sp</dimen>
+    <bool name="isTablet">false</bool>
+</resources>
