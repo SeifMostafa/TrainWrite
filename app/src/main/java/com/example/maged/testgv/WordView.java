@@ -1,6 +1,7 @@
 package com.example.maged.testgv;
 
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -25,9 +26,13 @@ import static com.example.maged.testgv.MainActivity.mUserGuidedVectors;
 public class WordView extends TextView{
     private static float POINT_WIDTH = 0;
     Context context;
-    public Path mPath;
-    public Paint circlePaint;
-    public Path circlePath;
+    private Bitmap mBitmap;
+    private Canvas mCanvas;
+    private Path mPath;
+    private Paint mPaint;
+    private Paint mBitmapPaint;
+    private Paint circlePaint;
+    private Path circlePath;
     public float mX, mY, mFingerFat;
     public Point lastPoint;
 
@@ -50,11 +55,12 @@ public class WordView extends TextView{
         init();
     }
 
-    private void init() {
+    public void init() {
         Typeface tf = Typeface.createFromAsset(getContext().getAssets(), "fonts/lvl1.ttf");
         this.setTypeface(tf);
         Log.i("init", "AM HERE!");
         mPath = new Path();
+        mBitmapPaint = new Paint(Paint.DITHER_FLAG);
         circlePaint = new Paint();
         circlePath = new Path();
         circlePaint.setAntiAlias(true);
@@ -62,26 +68,41 @@ public class WordView extends TextView{
         circlePaint.setStyle(Paint.Style.STROKE);
         circlePaint.setStrokeJoin(Paint.Join.MITER);
         circlePaint.setStrokeWidth(8f);
+        mPaint = new Paint();
+        mPaint.setAntiAlias(true);
+        mPaint.setDither(true);
+        mPaint.setColor(Color.RED);
+        mPaint.setStyle(Paint.Style.STROKE);
+        mPaint.setStrokeJoin(Paint.Join.ROUND);
+        mPaint.setStrokeCap(Paint.Cap.ROUND);
+        mPaint.setStrokeWidth(8);
         POINT_WIDTH = 1f;
         mUserGuidedVectors = new ArrayList<>();
-        mTouchedPoints = new ArrayList<>();
         setTextColor(Color.BLACK);
     }
 
     @Override
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
         super.onSizeChanged(w, h, oldw, oldh);
-    }
 
+        mBitmap = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
+        mCanvas = new Canvas(mBitmap);
+    }
     public void reset() {
+        mBitmap.recycle();
+        mBitmap = Bitmap.createBitmap(this.mBitmap.getWidth(), this.mBitmap.getHeight(), Bitmap.Config.ARGB_8888);
+        mCanvas = new Canvas(mBitmap);
         init();
         invalidate();
     }
 
+
+
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
-
+        canvas.drawBitmap(mBitmap, 0, 0, mBitmapPaint);
+        canvas.drawPath(mPath, mPaint);
         canvas.drawPath(circlePath, circlePaint);
     }
 
@@ -112,10 +133,10 @@ public class WordView extends TextView{
     private void touch_up() {
 
         mPath.lineTo(mX, mY);
-        circlePath.reset();
-        // commit the path to our offscreen
+        mCanvas.drawPath(mPath, mPaint);
         // kill this so we don't double draw
         mPath.reset();
+        circlePath.reset();
         if (mTouchedPoints.size() >= 2) {
             for (int i = 0; i < mTouchedPoints.size() - 1; i++) {
                 Point point1 = mTouchedPoints.get(i);
